@@ -16,13 +16,11 @@ class App: Application() {
         FriendlyCrash.build(this) { isOnForeground ->
             if (isOnForeground) {
                 Toast.makeText(this, "App moved to foreground", Toast.LENGTH_LONG).show()
-                Log.d(TAG, "App moved to foreground")
             } else {
                 Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
-                Log.d(TAG, "App moved to background")
             }
-        }.enable { thread, ex ->
-            ex.printStackTrace()
+        }.enable { _, ex ->
+            Log.e(TAG, "App crashed", ex)
         }
     }
 }

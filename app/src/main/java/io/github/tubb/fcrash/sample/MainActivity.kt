@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
     private val handler = @SuppressLint("HandlerLeak")
     object : Handler() {
         override fun handleMessage(msg: Message?) {
-            throw RuntimeException("Crash by yourself!")
+            throw RuntimeException("Crashed by yourself!")
         }
     }
 
