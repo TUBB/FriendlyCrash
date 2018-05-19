@@ -22,14 +22,21 @@ android.os.Process.killProcess(myPid())
 # Custom
 We add callback for app lifecycle, like `moved to foreground` and `moved to background`. Also you can get the notify when app crashed, then do something.
 ```kotlin
-FriendlyCrash.build(this) { isOnForeground ->
+override fun onCreate() {
+    super.onCreate()
+    FriendlyCrash.build(this, ::appMovedTo).enable(::unCatchException)
+}
+
+private fun unCatchException(thread: Thread, ex: Throwable) {
+    Log.e(TAG, "App crashed", ex)
+}
+
+private fun appMovedTo(isOnForeground: Boolean) {
     if (isOnForeground) {
         Toast.makeText(this, "App moved to foreground", Toast.LENGTH_LONG).show()
     } else {
         Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
     }
-}.enable { _, ex ->
-    Log.e(TAG, "App crashed", ex)
 }
 ```
 For more details, please see the demo project.
