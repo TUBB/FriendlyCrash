@@ -1,5 +1,5 @@
 package io.github.tubb.fcrash
 
 interface ExceptionHandler {
-    fun uncaughtException(t: Thread, e: Throwable)
+    fun uncaughtException(onForeground: Boolean, thread: Thread, ex: Throwable)
 }

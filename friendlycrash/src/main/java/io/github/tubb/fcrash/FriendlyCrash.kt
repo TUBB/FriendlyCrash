@@ -21,6 +21,8 @@ class FriendlyCrash private constructor(app: Application) {
         AppLifecycleListener()
     }
 
+    private var friendlyOnForeground = false
+
     companion object {
         private const val FOREGROUND_STATUS: Short = 1
         private const val BACKGROUND_STATUS: Short = 2
@@ -38,6 +40,7 @@ class FriendlyCrash private constructor(app: Application) {
          * Build the FriendlyCrash
          * @param app Real Application
          * @param lifeCallback Callback If app lifecycle changed
+         * @throws RuntimeException If occur inner error
          */
         fun build(app: Application, lifeCallback: (Boolean) -> Unit): FriendlyCrash {
             synchronized(this) {
@@ -46,7 +49,7 @@ class FriendlyCrash private constructor(app: Application) {
                 }
                 appLifecycleCallback = lifeCallback
             }
-            return instance!!
+            return instance?:throw RuntimeException("Inner error")
         }
 
         fun build(app: Application, handler: AppLifecycleHandler): FriendlyCrash {
@@ -65,18 +68,27 @@ class FriendlyCrash private constructor(app: Application) {
     }
 
     /**
+     * Friendly notify user when app on foreground, default is false
+     * @param friendlyOnForeground Enable or not
+     */
+    fun friendlyOnForeground(friendlyOnForeground: Boolean): FriendlyCrash {
+        this.friendlyOnForeground = friendlyOnForeground
+        return instance!!
+    }
+
+    /**
      * Enable friendly crash
      * @param listener Callback If app crashed
      */
-    fun enable(listener: ((Thread, Throwable) -> Unit)) {
+    fun enable(listener: ((Boolean, Thread, Throwable) -> Unit)) {
         with(ProcessLifecycleOwner.get().lifecycle) {
             removeObserver(appLifecycleObserver)
             addObserver(appLifecycleObserver)
         }
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, ex ->
-            listener.invoke(thread, ex)
-            if (!isAppOnForeground()) {
+            listener.invoke(isAppOnForeground(), thread, ex)
+            if (!isAppOnForeground() || friendlyOnForeground) {
                 killProcess(myPid())
             } else {
                 defaultHandler.uncaughtException(thread, ex)
@@ -85,12 +97,12 @@ class FriendlyCrash private constructor(app: Application) {
     }
 
     fun enable() {
-        enable { _, _ -> }
+        enable { _, _, _ -> }
     }
 
     fun enable(handler: ExceptionHandler) {
-        enable { thread, throwable ->
-            handler.uncaughtException(thread, throwable)
+        enable { _, thread, throwable ->
+            handler.uncaughtException(isAppOnForeground(), thread, throwable)
         }
     }
 

@@ -13,11 +13,19 @@ class App: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        FriendlyCrash.build(this, ::appMovedTo).enable(::unCatchException)
+        // friendly crash when app on background
+        FriendlyCrash.build(this, ::appMovedTo)
+                .friendlyOnForeground(true)
+                .enable(::appCrashed)
     }
 
-    private fun unCatchException(thread: Thread, ex: Throwable) {
-        Log.e(TAG, "App crashed", ex)
+    private fun appCrashed(onForeground: Boolean, thread: Thread, ex: Throwable) {
+        val msg = if (onForeground) {
+            "when app on foreground"
+        } else {
+            "when app on background"
+        }
+        Log.e(TAG, "App crashed $msg", ex)
     }
 
     private fun appMovedTo(isOnForeground: Boolean) {

@@ -6,7 +6,7 @@ Friendly notify user when app crashed if app moved to background.
 
 # Download
 ```groovy
-implementation 'com.github.TUBB:FriendlyCrash:0.0.1'
+implementation 'com.github.TUBB:FriendlyCrash:1.0.0'
 ```
 
 # Usage
@@ -16,30 +16,55 @@ FriendlyCrash.build(this).enable()
 ```
 If app crashed when app moved to background, we just kill app process, so `Force Close Dialog` will not showing.
 ```kotlin
-android.os.Process.killProcess(myPid())
+killProcess(myPid())
 ```
 
 # Custom
-We add callback for app lifecycle, like `moved to foreground` and `moved to background`. Also you can get the notify when app crashed, then do something.
+- We add callback for app lifecycle, like `moved to foreground` and `moved to background`.
+- Also you can get the notify when app crashed, then do something.
+- And enable friendly notify when app on foreground.
+
 ```kotlin
-override fun onCreate() {
-    super.onCreate()
-    FriendlyCrash.build(this, ::appMovedTo).enable(::unCatchException)
-}
+class App: Application() {
 
-private fun unCatchException(thread: Thread, ex: Throwable) {
-    Log.e(TAG, "App crashed", ex)
-}
+    companion object {
+        private const val TAG = "FriendlyCrash"
+    }
 
-private fun appMovedTo(isOnForeground: Boolean) {
-    if (isOnForeground) {
-        Toast.makeText(this, "App moved to foreground", Toast.LENGTH_LONG).show()
-    } else {
-        Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
+    override fun onCreate() {
+        super.onCreate()
+        // friendly crash when app on background
+        FriendlyCrash.build(this, ::appMovedTo)
+                // enable friendly notify when app on foreground
+                .friendlyOnForeground(true)
+                .enable(::appCrashed)
+    }
+
+    private fun appCrashed(onForeground: Boolean, thread: Thread, ex: Throwable) {
+        val msg = if (onForeground) {
+            "when app on foreground"
+        } else {
+            "when app on background"
+        }
+        Log.e(TAG, "App crashed $msg", ex)
+    }
+
+    private fun appMovedTo(isOnForeground: Boolean) {
+        if (isOnForeground) {
+            Toast.makeText(this, "App moved to foreground", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
+        }
     }
 }
 ```
 For more details, please see the demo project.
+
+# Dependencies
+```groovy
+implementation "android.arch.lifecycle:extensions:1.1.0"
+annotationProcessor "android.arch.lifecycle:compiler:1.1.0"
+```
 
 # License
 
