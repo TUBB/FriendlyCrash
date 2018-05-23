@@ -4,6 +4,8 @@ import android.app.Application
 import android.util.Log
 import android.widget.Toast
 import io.github.tubb.fcrash.FriendlyCrash
+import android.app.ActivityManager
+import android.content.Context
 
 class App: Application() {
 
@@ -13,10 +15,18 @@ class App: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // friendly crash when app on background
-        FriendlyCrash.build(this, ::appMovedTo)
-                .friendlyOnForeground(true)
-                .enable(::appCrashed)
+        val processName = getProcessName(this, android.os.Process.myPid())
+        processName?.let { name ->
+            if (name == packageName) { // main process
+                FriendlyCrash.build(this, ::appMovedTo)
+                        .friendlyOnForeground(false)
+                        .enable(::appCrashed)
+            } else { // background process
+                FriendlyCrash.build(this)
+                        .friendlyOnForeground(true)
+                        .enable()
+            }
+        }
     }
 
     private fun appCrashed(onForeground: Boolean, thread: Thread, ex: Throwable) {
@@ -34,5 +44,16 @@ class App: Application() {
         } else {
             Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun getProcessName(cxt: Context, pid: Int): String? {
+        val am = cxt.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val runningApps = am.runningAppProcesses ?: return null
+        for (procInfo in runningApps) {
+            if (procInfo.pid == pid) {
+                return procInfo.processName
+            }
+        }
+        return null
     }
 }

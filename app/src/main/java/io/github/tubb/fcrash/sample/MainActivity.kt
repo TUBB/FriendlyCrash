@@ -1,6 +1,7 @@
 package io.github.tubb.fcrash.sample
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -23,6 +24,10 @@ class MainActivity : AppCompatActivity() {
         btn_crash.setOnClickListener {
             Toast.makeText(this, "App will crash after 5s", Toast.LENGTH_SHORT).show()
             handler.sendEmptyMessageDelayed(0, 5000)
+        }
+        btn_crash_bg.setOnClickListener {
+            Toast.makeText(this, "Background service will crash after 5s", Toast.LENGTH_SHORT).show()
+            startService(Intent(this, ProcessService::class.java))
         }
     }
 }
