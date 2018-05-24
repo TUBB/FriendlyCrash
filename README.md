@@ -22,7 +22,7 @@ killProcess(myPid())
 # Custom
 - We add callback for app lifecycle, like `moved to foreground` and `moved to background`.
 - Also you can get the notify when app crashed, then do something.
-- And enable friendly notify when app on foreground.
+- And enable or disable friendly notify when app on foreground.
 
 ```kotlin
 class App: Application() {
@@ -33,11 +33,18 @@ class App: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // friendly crash when app on background
-        FriendlyCrash.build(this, ::appMovedTo)
-                // enable friendly notify when app on foreground
-                .friendlyOnForeground(true)
-                .enable(::appCrashed)
+        val processName = getProcessName(this, android.os.Process.myPid())
+        processName?.let { name ->
+            if (name == packageName) { // main process
+                FriendlyCrash.build(this, ::appMovedTo)
+                        .friendlyOnForeground(false)
+                        .enable(::appCrashed)
+            } else { // background process
+                FriendlyCrash.build(this)
+                        .friendlyOnForeground(true)
+                        .enable()
+            }
+        }
     }
 
     private fun appCrashed(onForeground: Boolean, thread: Thread, ex: Throwable) {
@@ -55,6 +62,14 @@ class App: Application() {
         } else {
             Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun getProcessName(cxt: Context, pid: Int): String? {
+        val am = cxt.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val runningApps = am.runningAppProcesses ?: return null
+        return runningApps
+                .firstOrNull { it.pid == pid }
+                ?.processName
     }
 }
 ```
