@@ -5,6 +5,7 @@ import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.ProcessLifecycleOwner
 import android.os.Process.killProcess
 import android.os.Process.myPid
+import kotlin.properties.Delegates
 
 /**
  * Friendly notify user when app crashed
@@ -30,9 +31,9 @@ class FriendlyCrash private constructor(app: Application) {
          * Arrow function for app lifecycle callback
          */
         private var appLifecycleCallback: ((Boolean) -> Unit)? = null
-        private var instance: FriendlyCrash? = null
+        private var instance: FriendlyCrash by Delegates.notNull<FriendlyCrash>()
 
-        internal fun instance(): FriendlyCrash? {
+        internal fun instance(): FriendlyCrash {
             return instance
         }
 
@@ -43,13 +44,9 @@ class FriendlyCrash private constructor(app: Application) {
          * @throws RuntimeException If occur inner error
          */
         fun build(app: Application, lifeCallback: (Boolean) -> Unit): FriendlyCrash {
-            synchronized(this) {
-                if (instance == null) {
-                    instance = FriendlyCrash(app)
-                }
-                appLifecycleCallback = lifeCallback
-            }
-            return instance?:throw RuntimeException("Inner error")
+            instance = FriendlyCrash(app)
+            appLifecycleCallback = lifeCallback
+            return instance
         }
 
         fun build(app: Application, handler: AppLifecycleHandler): FriendlyCrash {
@@ -73,7 +70,7 @@ class FriendlyCrash private constructor(app: Application) {
      */
     fun friendlyOnForeground(friendlyOnForeground: Boolean): FriendlyCrash {
         this.friendlyOnForeground = friendlyOnForeground
-        return instance!!
+        return instance
     }
 
     /**

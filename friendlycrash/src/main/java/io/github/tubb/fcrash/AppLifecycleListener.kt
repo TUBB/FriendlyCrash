@@ -7,11 +7,11 @@ import android.arch.lifecycle.OnLifecycleEvent
 internal class AppLifecycleListener: LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onMoveToForeground() {
-        FriendlyCrash.instance()?.appMoveToForeground()
+        FriendlyCrash.instance().appMoveToForeground()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onMoveToBackground() {
-        FriendlyCrash.instance()?.appMoveToBackground()
+        FriendlyCrash.instance().appMoveToBackground()
     }
 }
