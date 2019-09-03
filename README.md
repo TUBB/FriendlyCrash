@@ -1,4 +1,4 @@
-# Prefetch
+# FriendlyCrash
 [![Release](https://jitpack.io/v/TUBB/FriendlyCrash.svg)](https://jitpack.io/#TUBB/FriendlyCrash)
  ![](https://img.shields.io/badge/minSdkVersion-15-brightgreen.svg)  [![](https://img.shields.io/badge/license-Apache%202-lightgrey.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
@@ -80,7 +80,13 @@ For more details, please see the [DEMO](https://github.com/TUBB/FriendlyCrash/tr
 
 # Dependencies
 ```groovy
-implementation "android.arch.lifecycle:extensions:1.1.1"
+implementation("android.arch.lifecycle:extensions:1.1.1") {
+    exclude group: 'com.android.support', module: 'support-annotations'
+    exclude group: 'com.android.support', module: 'support-compat'
+    exclude group: 'com.android.support', module: 'support-fragment'
+    exclude group: 'com.android.support', module: 'support-core-ui'
+    exclude group: 'com.android.support', module: 'support-core-utils'
+}
 annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 ```
 
