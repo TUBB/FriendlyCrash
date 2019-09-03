@@ -6,7 +6,7 @@ Friendly notify user when app crashed if app moved to background.
 
 # Download
 ```groovy
-implementation 'com.github.TUBB:FriendlyCrash:1.0.0'
+implementation 'io.github.tubb:friendlycrash:1.0.2'
 ```
 
 # Usage
@@ -58,12 +58,12 @@ class App: Application() {
     }
 }
 ```
-For more details, please see the demo project.
+For more details, please see the [DEMO](https://github.com/TUBB/FriendlyCrash/tree/master/app/src/main/java/io/github/tubb/fcrash/sample) project.
 
 # Dependencies
 ```groovy
-implementation "android.arch.lifecycle:extensions:1.1.0"
-annotationProcessor "android.arch.lifecycle:compiler:1.1.0"
+implementation "android.arch.lifecycle:extensions:1.1.1"
+annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 ```
 
 # License

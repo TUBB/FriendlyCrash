@@ -11,20 +11,26 @@ class App: Application() {
 
     companion object {
         private const val TAG = "FriendlyCrash"
+        var appFriendly: Boolean = false
+        var bgmFriendly: Boolean = false
+        lateinit var appFriendlyCrash: FriendlyCrash
+        lateinit var bgmFriendlyCrash: FriendlyCrash
     }
 
     override fun onCreate() {
         super.onCreate()
+        initFriendlyCrash()
+    }
+
+    private fun initFriendlyCrash() {
         val processName = getProcessName(this, android.os.Process.myPid())
         processName?.let { name ->
             if (name == packageName) { // main process
-                FriendlyCrash.build(this, ::appMovedTo)
-                        .friendlyOnForeground(false)
-                        .enable(::appCrashed)
+                appFriendlyCrash = FriendlyCrash.build(this, ::appMovedTo)
+                appFriendlyCrash.friendlyOnForeground(appFriendly).enable(::appCrashed)
             } else { // background process
-                FriendlyCrash.build(this)
-                        .friendlyOnForeground(true)
-                        .enable()
+                bgmFriendlyCrash = FriendlyCrash.build(this)
+                bgmFriendlyCrash.friendlyOnForeground(bgmFriendly).enable()
             }
         }
     }
@@ -38,8 +44,8 @@ class App: Application() {
         Log.e(TAG, "App crashed $msg", ex)
     }
 
-    private fun appMovedTo(isOnForeground: Boolean) {
-        if (isOnForeground) {
+    private fun appMovedTo(foreground: Boolean) {
+        if (foreground) {
             Toast.makeText(this, "App moved to foreground", Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
@@ -49,11 +55,25 @@ class App: Application() {
     private fun getProcessName(cxt: Context, pid: Int): String? {
         val am = cxt.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val runningApps = am.runningAppProcesses ?: return null
-        for (procInfo in runningApps) {
-            if (procInfo.pid == pid) {
-                return procInfo.processName
+        for (processInfo in runningApps) {
+            if (processInfo.pid == pid) {
+                return processInfo.processName
             }
         }
         return null
+    }
+
+    fun changeAppFriendly(friendly: Boolean) {
+        if (friendly != appFriendly) {
+            appFriendly = friendly
+            appFriendlyCrash.friendlyOnForeground(friendly)
+        }
+    }
+
+    fun changeBgmFriendly(friendly: Boolean) {
+        if (friendly != bgmFriendly) {
+            bgmFriendly = friendly
+            bgmFriendlyCrash.friendlyOnForeground(friendly)
+        }
     }
 }

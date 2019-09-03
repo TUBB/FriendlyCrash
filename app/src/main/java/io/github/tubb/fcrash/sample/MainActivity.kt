@@ -14,20 +14,31 @@ class MainActivity : AppCompatActivity() {
     private val handler = @SuppressLint("HandlerLeak")
     object : Handler() {
         override fun handleMessage(msg: Message?) {
-            throw RuntimeException("Crashed by yourself!")
+            throw RuntimeException("Crashed by me!")
         }
     }
+
+    private var bgmFriendlyCrash: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val app: App = application as App
+        swt_app.setOnCheckedChangeListener { _, isChecked ->
+            app.changeAppFriendly(isChecked)
+        }
+        swt_bgm.setOnCheckedChangeListener { _, isChecked ->
+            bgmFriendlyCrash = isChecked
+        }
         btn_crash.setOnClickListener {
             Toast.makeText(this, "App will crash after 5s", Toast.LENGTH_SHORT).show()
             handler.sendEmptyMessageDelayed(0, 5000)
         }
         btn_crash_bg.setOnClickListener {
             Toast.makeText(this, "Background service will crash after 5s", Toast.LENGTH_SHORT).show()
-            startService(Intent(this, ProcessService::class.java))
+            val bgmIntent: Intent = Intent(this, ProcessService::class.java)
+            bgmIntent.putExtra("bgmFriendlyCrash", bgmFriendlyCrash)
+            startService(bgmIntent)
         }
     }
 }

@@ -8,9 +8,14 @@ import android.os.IBinder
 class ProcessService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val bgmFriendlyCrash: Boolean? = intent?.getBooleanExtra("bgmFriendlyCrash", false)
+        bgmFriendlyCrash?.let { friendly ->
+            val app: App = application as App
+            app.changeBgmFriendly(friendly)
+        }
         Handler().postDelayed({
             throw RuntimeException("Background service crashed")
-        }, 1000)
+        }, 5000)
         return super.onStartCommand(intent, flags, startId)
     }
 
