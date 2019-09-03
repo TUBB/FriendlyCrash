@@ -6,7 +6,7 @@ Friendly notify user when app crashed if app moved to background.
 
 # Download
 ```groovy
-implementation 'io.github.tubb:friendlycrash:1.0.2'
+implementation 'io.github.tubb:friendlycrash:1.0.3'
 ```
 
 # Usage
@@ -56,8 +56,8 @@ class App: Application() {
         Log.e(TAG, "App crashed $msg", ex)
     }
 
-    private fun appMovedTo(isOnForeground: Boolean) {
-        if (isOnForeground) {
+    private fun appMovedTo(foreground: Boolean) {
+        if (foreground) {
             Toast.makeText(this, "App moved to foreground", Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(this, "App moved to background", Toast.LENGTH_LONG).show()
@@ -67,9 +67,12 @@ class App: Application() {
     private fun getProcessName(cxt: Context, pid: Int): String? {
         val am = cxt.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val runningApps = am.runningAppProcesses ?: return null
-        return runningApps
-                .firstOrNull { it.pid == pid }
-                ?.processName
+        for (processInfo in runningApps) {
+            if (processInfo.pid == pid) {
+                return processInfo.processName
+            }
+        }
+        return null
     }
 }
 ```
