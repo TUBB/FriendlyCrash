@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 102
-        versionName "1.0.2"
+        versionCode 103
+        versionName "1.0.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -25,13 +25,19 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation("android.arch.lifecycle:extensions:1.1.1") {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.android.support', module: 'support-compat'
+        exclude group: 'com.android.support', module: 'support-fragment'
+        exclude group: 'com.android.support', module: 'support-core-ui'
+        exclude group: 'com.android.support', module: 'support-core-utils'
+    }
     annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
 project.ext {
     mavDevelopers = ["TUBB":"BingBing Tu"]
@@ -41,8 +47,8 @@ project.ext {
     mavLibraryLicenses = ["Apache-2.0":'http://www.apache.org/licenses/LICENSE-2.0.txt']
     mavLibraryDescription = "Friendly notify user when app crashed if app moved to background"
     mavPublishToRemoteRepo = true
-    mavRemoteRepoUser = "TUBB"
-    mavRemoteRepoPassword = "2553441abc"
+    mavRemoteRepoUser = properties.getProperty("repo.username")
+    mavRemoteRepoPassword = properties.getProperty("repo.pwd")
     mavRepoRemoteUrl = "https://jitpack.io"
 }
 
